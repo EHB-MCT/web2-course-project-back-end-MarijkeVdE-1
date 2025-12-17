@@ -1,0 +1,15 @@
+✔ MongoDB connectie ok
+✔ CRUD exercises & categories
+⏭ Morgen: feedback of assets / frontend test
+
+Frontend => nog opstarten
+- Index.html
+- log in pag
+- registreerpg
+- de verschillende pagina's:
+    - photoshop
+    - illustrator
+    - motion
+    - animatie
+- upload-pg
+- css

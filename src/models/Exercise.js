@@ -1,40 +1,42 @@
+
 const mongoose = require('mongoose');
 
 const exerciseSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-      trim: true,
+    title: { 
+      type: String, 
+      required: true, 
+      trim: true 
     },
+  
 
     category: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
       required: true,
     },
 
-    programme: {
-      type: String,
-      required: true, // bv. Multimedia, Grafische Vormgeving
+    programme: { 
+      type: String, 
+      required: true 
     },
 
-    year: {
-      type: Number,
-      required: true, // bv. 1, 2, 3
+    year: { 
+      type: Number, 
+      required: true 
     },
 
     degree: {
-      type: String,
-      required: true, // Bachelor / Graduaat
-    },
+       type: String, 
+       required: true 
+      },
 
-    description: {
-      type: String,
+    description: { 
+      type: String 
     },
   },
-  {
-    timestamps: true, // createdAt & updatedAt
-  }
+  
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('Exercise', exerciseSchema);

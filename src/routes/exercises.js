@@ -1,9 +1,13 @@
-// Ik geef één uitgewerkt voorbeeld per type (dan kun je de rest copy-pasten en aanpassen).
-
 const express = require('express');
+const mongoose = require('mongoose');
 const Exercise = require('../models/Exercise');
 
 const router = express.Router();
+
+// helper: check of id geldig is
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
 
 // GET /api/exercises
 router.get('/', async (req, res) => {
@@ -15,12 +19,33 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/exercises/:id
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: 'Invalid id' });
+    }
+
+    const exercise = await Exercise.findById(id);
+
+    if (!exercise) {
+      return res.status(404).json({ message: 'Exercise not found' });
+    }
+
+    res.status(200).json(exercise);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
 // POST /api/exercises
 router.post('/', async (req, res) => {
   try {
     const { title, category, programme, year, degree, description } = req.body;
 
-    if (!title || !category || !programme || !year || !degree) {
+    if (!title || !category || !programme || year === undefined || !degree) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -42,8 +67,15 @@ router.post('/', async (req, res) => {
 // PUT /api/exercises/:id
 router.put('/:id', async (req, res) => {
   try {
-    const updated = await Exercise.findByIdAndUpdate(req.params.id, req.body, {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: 'Invalid id' });
+    }
+
+    const updated = await Exercise.findByIdAndUpdate(id, req.body, {
       new: true,
+      runValidators: true, // belangrijk!
     });
 
     if (!updated) {
@@ -51,6 +83,27 @@ router.put('/:id', async (req, res) => {
     }
 
     res.status(200).json(updated);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// DELETE /api/exercises/:id
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: 'Invalid id' });
+    }
+
+    const deleted = await Exercise.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: 'Exercise not found' });
+    }
+
+    res.status(200).json({ message: 'Exercise deleted', id: deleted._id });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }

@@ -2,14 +2,39 @@ const mongoose = require('mongoose');
 
 const exerciseSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
-    category: { type: String, required: true }, // simple string zoals in je voorbeeld
-    programme: { type: String, required: true }, // opleiding / richting
-    year: { type: Number, required: true },
-    degree: { type: String, required: true }, // Bachelor / Graduaat
-    description: { type: String },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    category: {
+      type: String,
+      required: true,
+    },
+
+    programme: {
+      type: String,
+      required: true, // bv. Multimedia, Grafische Vormgeving
+    },
+
+    year: {
+      type: Number,
+      required: true, // bv. 1, 2, 3
+    },
+
+    degree: {
+      type: String,
+      required: true, // Bachelor / Graduaat
+    },
+
+    description: {
+      type: String,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true, // createdAt & updatedAt
+  }
 );
 
 module.exports = mongoose.model('Exercise', exerciseSchema);

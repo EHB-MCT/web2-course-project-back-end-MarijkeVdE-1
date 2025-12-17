@@ -1,7 +1,7 @@
 // Ik geef één uitgewerkt voorbeeld per type (dan kun je de rest copy-pasten en aanpassen).
 
 const express = require('express');
-const Category = require('../models/Category');
+const Category = require('../models/category');
 
 const router = express.Router();
 

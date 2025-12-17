@@ -1,7 +1,7 @@
 // Ik geef één uitgewerkt voorbeeld per type (dan kun je de rest copy-pasten en aanpassen).
 
 const express = require('express');
-const Asset = require('../models/Asset');
+const Asset = require('../models/asset');
 const upload = require('../middleware/upload');
 
 const router = express.Router();

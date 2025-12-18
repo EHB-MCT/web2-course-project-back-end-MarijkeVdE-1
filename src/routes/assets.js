@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
+
 const Asset = require('../models/asset');
 
 const router = express.Router();
@@ -10,7 +11,7 @@ function isValidObjectId(id) {
   return mongoose.Types.ObjectId.isValid(id);
 }
 
-// opslagconfig
+// Multer storage config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => {
@@ -20,21 +21,20 @@ const storage = multer.diskStorage({
   },
 });
 
-// (simpel) filter alleen images + pdf (pas aan als je wil)
+// Allow only images + pdf (simpel en verdedigbaar)
 const fileFilter = (req, file, cb) => {
   const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
-  if (allowed.includes(file.mimetype)) cb(null, true);
-  else cb(new Error('Only JPG/PNG/WEBP/PDF allowed'), false);
+  if (allowed.includes(file.mimetype)) return cb(null, true);
+  return cb(new Error('Only JPG/PNG/WEBP/PDF allowed'), false);
 };
 
-// max 5MB (pas aan indien nodig)
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
 
-// GET /api/assets (optioneel filter: ?exerciseId=...)
+// GET /api/assets  (optioneel filter: ?exerciseId=...)
 router.get('/', async (req, res) => {
   try {
     const { exerciseId } = req.query;
@@ -47,14 +47,17 @@ router.get('/', async (req, res) => {
       filter.exercise = exerciseId;
     }
 
-    const assets = await Asset.find(filter).populate('exercise').sort({ createdAt: -1 });
+    const assets = await Asset.find(filter)
+      .populate('exercise')
+      .sort({ createdAt: -1 });
+
     res.status(200).json(assets);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
-// POST /api/assets/upload  (multer)
+// POST /api/assets/upload  (multer upload)
 router.post('/upload', upload.single('file'), async (req, res) => {
   try {
     const { exercise, caption } = req.body;
@@ -85,7 +88,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-// DELETE /api/assets/:id (verwijdert alleen DB record; file delete kan later)
+// DELETE /api/assets/:id
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -99,6 +102,7 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Asset not found' });
     }
 
+    // Note: file verwijderen op schijf is optioneel (nice-to-have)
     res.status(200).json({ message: 'Asset deleted' });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });

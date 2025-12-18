@@ -12,17 +12,17 @@ const assetSchema = new mongoose.Schema(
       type: String, 
       required: true 
     },
-
+    
     originalName: { 
       type: String, 
       required: true 
     },
-
+    
     mimeType: { 
       type: String, 
       required: true 
     },
-
+    
     size: { 
       type: Number, 
       required: true 
@@ -31,14 +31,15 @@ const assetSchema = new mongoose.Schema(
     url: { 
       type: String, 
       required: true 
-    }, // bv /uploads/12345.png
+    }, // bv. /uploads/<filename>
 
     caption: { 
       type: String, 
-      trim: true },
+      trim: true 
+    },
   },
-  
   { timestamps: true }
 );
 
 module.exports = mongoose.model('Asset', assetSchema);
+

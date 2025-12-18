@@ -1,42 +1,105 @@
-// Ik geef één uitgewerkt voorbeeld per type (dan kun je de rest copy-pasten en aanpassen).
-
 const express = require('express');
+const mongoose = require('mongoose');
+const multer = require('multer');
+const path = require('path');
 const Asset = require('../models/asset');
-const upload = require('../middleware/upload');
 
 const router = express.Router();
 
-// GET /api/assets
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
+// opslagconfig
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const safeName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+    cb(null, safeName);
+  },
+});
+
+// (simpel) filter alleen images + pdf (pas aan als je wil)
+const fileFilter = (req, file, cb) => {
+  const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+  if (allowed.includes(file.mimetype)) cb(null, true);
+  else cb(new Error('Only JPG/PNG/WEBP/PDF allowed'), false);
+};
+
+// max 5MB (pas aan indien nodig)
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+// GET /api/assets (optioneel filter: ?exerciseId=...)
 router.get('/', async (req, res) => {
   try {
-    const assets = await Asset.find().populate('exercise');
+    const { exerciseId } = req.query;
+    const filter = {};
+
+    if (exerciseId) {
+      if (!isValidObjectId(exerciseId)) {
+        return res.status(400).json({ message: 'Invalid exerciseId' });
+      }
+      filter.exercise = exerciseId;
+    }
+
+    const assets = await Asset.find(filter).populate('exercise').sort({ createdAt: -1 });
     res.status(200).json(assets);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
-// POST /api/assets  (multipart/form-data)
-router.post('/', upload.single('file'), async (req, res) => {
+// POST /api/assets/upload  (multer)
+router.post('/upload', upload.single('file'), async (req, res) => {
   try {
-    const { title, exercise, year, degree, category, description } = req.body;
+    const { exercise, caption } = req.body;
 
+    if (!exercise) {
+      return res.status(400).json({ message: 'Missing required field: exercise' });
+    }
+    if (!isValidObjectId(exercise)) {
+      return res.status(400).json({ message: 'Invalid exercise id' });
+    }
     if (!req.file) {
-      return res.status(400).json({ message: 'File is required' });
+      return res.status(400).json({ message: 'Missing file (field name must be "file")' });
     }
 
-    const asset = await Asset.create({
-      title,
+    const created = await Asset.create({
       exercise,
-      year,
-      degree,
-      category,
-      description,
-      filePath: req.file.path,
+      caption,
+      filename: req.file.filename,
       originalName: req.file.originalname,
+      mimeType: req.file.mimetype,
+      size: req.file.size,
+      url: `/uploads/${req.file.filename}`,
     });
 
-    res.status(201).json(asset);
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// DELETE /api/assets/:id (verwijdert alleen DB record; file delete kan later)
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: 'Invalid id' });
+    }
+
+    const deleted = await Asset.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ message: 'Asset not found' });
+    }
+
+    res.status(200).json({ message: 'Asset deleted' });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }

@@ -1,9 +1,12 @@
-// Ik geef één uitgewerkt voorbeeld per type (dan kun je de rest copy-pasten en aanpassen).
-
 const express = require('express');
+const mongoose = require('mongoose');
 const Feedback = require('../models/feedback');
 
 const router = express.Router();
+
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
 
 // GET /api/feedback
 router.get('/', async (req, res) => {
@@ -18,31 +21,15 @@ router.get('/', async (req, res) => {
 // POST /api/feedback
 router.post('/', async (req, res) => {
   try {
-    const {
-      title,
-      exercise,
-      category,
-      programme,
-      year,
-      degree,
-      message,
-      rating,
-    } = req.body;
+    const { exercise, comment, rating } = req.body;
 
-    if (!title || !exercise || !category || !programme || !year || !degree || !message || !rating) {
-      return res.status(400).json({ message: 'Missing required fields' });
+    if (!exercise || !comment) {
+      return res
+        .status(400)
+        .json({ message: 'Missing required fields (exercise, comment)' });
     }
 
-    const feedback = await Feedback.create({
-      title,
-      exercise,
-      category,
-      programme,
-      year,
-      degree,
-      message,
-      rating,
-    });
+    const feedback = await Feedback.create({ exercise, comment, rating });
 
     res.status(201).json(feedback);
   } catch (err) {
@@ -53,10 +40,18 @@ router.post('/', async (req, res) => {
 // DELETE /api/feedback/:id
 router.delete('/:id', async (req, res) => {
   try {
-    const deleted = await Feedback.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: 'Invalid id' });
+    }
+
+    const deleted = await Feedback.findByIdAndDelete(id);
+
     if (!deleted) {
       return res.status(404).json({ message: 'Feedback not found' });
     }
+
     res.status(200).json({ message: 'Feedback deleted' });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });

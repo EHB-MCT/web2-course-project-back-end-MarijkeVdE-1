@@ -2,19 +2,42 @@ const mongoose = require('mongoose');
 
 const assetSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
     exercise: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Exercise',
       required: true,
     },
-    year: { type: Number, required: true },
-    degree: { type: String, required: true },
-    category: { type: String, required: true },
-    description: { type: String },
-    filePath: { type: String, required: true }, // pad naar het geüploade bestand
-    originalName: { type: String },             // oorspronkelijke bestandsnaam
+
+    filename: { 
+      type: String, 
+      required: true 
+    },
+
+    originalName: { 
+      type: String, 
+      required: true 
+    },
+
+    mimeType: { 
+      type: String, 
+      required: true 
+    },
+
+    size: { 
+      type: Number, 
+      required: true 
+    },
+
+    url: { 
+      type: String, 
+      required: true 
+    }, // bv /uploads/12345.png
+
+    caption: { 
+      type: String, 
+      trim: true },
   },
+  
   { timestamps: true }
 );
 

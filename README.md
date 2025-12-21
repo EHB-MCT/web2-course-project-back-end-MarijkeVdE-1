@@ -1,22 +1,123 @@
-[![Open in Codespaces](https://classroom.github.com/assets/launch-codespace-2972f46106e565e64193e422d61a12cf1da4916b45550586e14ef0a7c637dd04.svg)](https://classroom.github.com/open-in-codespaces?assignment_repo_id=21959302)
-# Your project name ✨
-A short description of your project. Aim for 2-3 lines. \
+Design Exercise Hub
 
-Website url: [website.be](website.be) (optional)
+Web2 – Backend API  
 
-If you want to add more sections, please do so after the existing ones (avoid burying your sources under a lot of text!).
+Backend API voor **Design Exercise Hub**.  
+De API beheert design-oefeningen, categorieën, feedback en assets (uploads).
 
-## Up & running (optional) 🏃‍➡️
-This should contain step by step instructions to run your project (delete this section if it's not relevant). \
-Also include login credentials or other vital information if needed.
 
-## Sources 🗃️
-List **ALL your used sources** here:
-- Used a tutorial or example code? Place a link to them here. (youtube, website, github, ...) and **list the files in which they were used**.
-- Used ChatGPT? Generate a ChatGPT share link: options (three dots) > share and **list the files in which it was used**. This will not work if you have uploaded images in your prompt. In that case, add screenshots instead.
+1. Tech stack
 
-It's not enough to only list the sources here, also add the sources to the top of the files in which you used them and indicate the specific parts of the code which are not your own (by writing comments and refering to the correct source(s)). \
-IF you use a source as the base/start for a file, then first place the source in the file and **COMMIT it IMMEDIATELY, BEFORE** adding your own code or modifying it. \
-**ALWAYS** use concise BUT CLEAR commit messages!
+- Node.js
+- Express
+- MongoDB Atlas
+- Mongoose
+- Multer
+- dotenv
+- CORS
 
-Have a look at the example repository: https://github.com/EHB-MCT/example-readme
+
+2. Installatie
+
+- Installeer dependencies:
+
+npm install
+Maak een .env bestand in de root:
+
+env
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/<database>
+PORT=5052
+JWT_SECRET=supersecret
+Start de server:
+
+npm run dev
+De server draait op:
+
+http://localhost:5052
+
+Projectstructuur
+css
+
+src/
+  models/
+  routes/
+  app.js
+server.js
+uploads/
+Datamodel (overzicht)
+
+* Category
+    name
+    description
+    timestamps
+
+* Exercise
+    title
+    category (ObjectId → Category)
+    programme
+    year
+    degree
+    description
+    timestamps
+    
+* Feedback
+    exercise (ObjectId → Exercise)
+    comment
+    timestamps
+
+* Asset
+    exercise (ObjectId → Exercise)
+    filename
+    originalName
+    url
+    caption
+    timestamps
+
+API Endpoints
+Base URL: http://localhost:5052/api
+
+* Categories
+    GET /categories
+    POST /categories
+    PUT /categories/:id
+    DELETE /categories/:id
+
+* Exercises
+    GET /exercises
+    POST /exercises
+    PUT /exercises/:id
+    DELETE /exercises/:id
+
+* Feedback
+    GET /feedback
+    POST /feedback
+    DELETE /feedback/:id
+
+* Assets (multer upload)
+    GET /assets
+    POST /assets/upload
+    DELETE /assets/:id
+
+* Multer uploads
+Geüploade bestanden worden opgeslagen in:
+
+    /uploads
+    De map wordt statisch geserveerd via:
+    app.use('/uploads', express.static('uploads'));
+    Een bestand is bereikbaar via:
+
+http://localhost:5052/uploads/<filename>
+- Opmerkingen
+- Relaties worden gelegd via ObjectId en ref
+- Assets worden gekoppeld aan exercises
+- Feedback hoort bij één exercise
+- Backend volgt REST-principes
+
+
+
+
+
+
+
+
+

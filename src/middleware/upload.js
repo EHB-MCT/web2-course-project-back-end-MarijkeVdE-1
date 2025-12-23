@@ -15,9 +15,27 @@ const storage = multer.diskStorage({
 
 // Eenvoudige file filter (bv. enkel pdf/jpg/png)
 const fileFilter = (req, file, cb) => {
-  // hier kan je nog extra checks doen
-  cb(null, true);
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/pdf",
+    "video/mp4"
+    "illustration/eps"
+  ];
+
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      new Error(
+        "File type not allowed. Only JPG, PNG, WEBP, PDF, MP4 and EPS are allowed."
+      ),
+      false
+    );
+  }
 };
+
 
 const upload = multer({ storage, fileFilter });
 

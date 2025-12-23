@@ -1,10 +1,10 @@
 const multer = require('multer');
 const path = require('path');
 
-// Storage-configuratie
+//Opslag-configuratie
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // zorg dat deze map bestaat
+    cb(null, 'uploads/'); // map waarin de ge-uploade files terecht komen
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -12,16 +12,15 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + '-' + uniqueSuffix + ext);
   },
 });
-
-// Eenvoudige file filter (bv. enkel pdf/jpg/png)
+//Toegestane files 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     "image/jpeg",
     "image/png",
     "image/webp",
     "application/pdf",
-    "video/mp4"
-    "illustration/eps"
+    "video/mp4",
+    "illustration/eps",
   ];
 
   if (allowedTypes.includes(file.mimetype)) {

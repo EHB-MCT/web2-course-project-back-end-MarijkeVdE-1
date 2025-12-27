@@ -12,7 +12,10 @@ function requireAuth(req, res, next) {
   if (!token) return res.status(401).json({ message: "No token provided." });
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET || "dev_secret_change_me");
+    const payload = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "dev_secret_change_me"
+    );
     req.userId = payload.userId;
     next();
   } catch (err) {
@@ -20,7 +23,24 @@ function requireAuth(req, res, next) {
   }
 }
 
-// UPLOAD
+/**
+ * GET /api/assets
+ * Lijst alle assets (voor Assignment page)
+ */
+router.get("/", async (req, res) => {
+  try {
+    const assets = await Asset.find().sort({ createdAt: -1 });
+    res.json(assets);
+  } catch (err) {
+    console.error("ASSET LIST ERROR:", err);
+    res.status(500).json({ message: "Failed to load assets." });
+  }
+});
+
+/**
+ * POST /api/assets/upload
+ * Upload asset (image/mp4/pdf/...)
+ */
 router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file uploaded." });
@@ -41,23 +61,23 @@ router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
       url: `/uploads/${req.file.filename}`,
     });
 
-    // Easter egg / teller
-    await User.findByIdAndUpdate(req.userId, { $inc: { uploadCount: 1 } });
+    // Easter egg teller: +1 en nieuwe waarde teruggeven
+    // 👇 uploadCount verhogen
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      { $inc: { uploadCount: 1 } },
+      { new: true }
+    );
 
-    res.status(201).json(asset);
+    // 👇 asset + teller terugsturen
+    res.status(201).json({
+      asset,
+      uploadCount: user.uploadCount,
+    });
+
   } catch (err) {
     console.error("ASSET UPLOAD ERROR:", err);
     res.status(500).json({ message: "Upload failed." });
-  }
-});
-
-router.get("/", async (req, res) => {
-  try {
-    const assets = await Asset.find().sort({ createdAt: -1 });
-    res.json(assets);
-  } catch (err) {
-    console.error("ASSET LIST ERROR:", err);
-    res.status(500).json({ message: "Failed to load assets." });
   }
 });
 

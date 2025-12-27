@@ -2,8 +2,23 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, required: true }
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+
+    // 👇 EASTER EGG TELLER
+    uploadCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

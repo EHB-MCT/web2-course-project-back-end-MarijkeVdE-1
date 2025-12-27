@@ -1,12 +1,11 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const assetSchema = new mongoose.Schema(
   {
-    exercise: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Exercise',
-      required: true,
-    },
+    category: String,
+    year: String,
+    title: String,
+    caption: String,
 
     filename: { 
       type: String, 
@@ -27,19 +26,13 @@ const assetSchema = new mongoose.Schema(
       type: Number, 
       required: true 
     },
-
+    
     url: { 
       type: String, 
       required: true 
-    }, // bv. /uploads/<filename>
-
-    caption: { 
-      type: String, 
-      trim: true 
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Asset', assetSchema);
-
+module.exports = mongoose.model("Asset", assetSchema);

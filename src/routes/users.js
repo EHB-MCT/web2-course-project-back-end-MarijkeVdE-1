@@ -1,53 +1,30 @@
-//Ik geef één uitgewerkt voorbeeld per type (dan kun je de rest copy-pasten en aanpassen).
+const router = require("express").Router();
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 
-const express = require('express');
-const bcrypt = require('bcrypt');
-const User = require('../models/user');
-
-const router = express.Router();
-
-// GET /api/users — alle users
-router.get('/', async (req, res) => {
-  try {
-    const users = await User.find().select('-password'); // geen wachtwoorden tonen
-    res.status(200).json(users);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
-  }
+router.post("/register", async (req, res) => {
+  const { email, password } = req.body;
+  const hash = await bcrypt.hash(password, 10);
+  const user = await User.create({ email, password: hash });
+  res.status(201).json({ id: user._id });
 });
 
-// POST /api/users — nieuwe user
-router.post('/', async (req, res) => {
-  try {
-    const { name, email, password, role } = req.body;
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) return res.status(401).json({ message: "Invalid login" });
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: 'Name, email and password are required' });
-    }
+  const ok = await bcrypt.compare(password, user.password);
+  if (!ok) return res.status(401).json({ message: "Invalid login" });
 
-    const existing = await User.findOne({ email });
-    if (existing) {
-      return res.status(400).json({ message: 'Email already in use' });
-    }
+  const token = jwt.sign(
+    { id: user._id, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: "2h" }
+  );
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      role: role || 'student',
-    });
-
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    });
-  } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
-  }
+  res.json({ token });
 });
 
 module.exports = router;

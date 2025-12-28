@@ -18,7 +18,6 @@ const allowedExt = new Set([
   ".webp",
   ".pdf",
   ".mp4",
-  ".eps",
 ]);
 
 function fileFilter(req, file, cb) {
@@ -34,5 +33,5 @@ function fileFilter(req, file, cb) {
 module.exports = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB
 });

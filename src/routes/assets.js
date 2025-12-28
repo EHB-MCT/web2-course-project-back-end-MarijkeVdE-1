@@ -39,7 +39,9 @@ router.get("/", async (req, res) => {
 
 /**
  * POST /api/assets/upload
- * Upload asset (image/mp4/pdf/...)
+ * Upload asset (image/mp4/pdf/eps/...)
+ * - file = hoofdfile
+ * - preview = optioneel (handig voor EPS)
  */
 router.post(
   "/upload",
@@ -71,7 +73,7 @@ router.post(
         size: main.size,
         url: `/uploads/${main.filename}`,
 
-        // ✅ extra previewUrl (indien aanwezig)
+        // extra previewUrl (indien aanwezig)
         previewUrl: preview ? `/uploads/${preview.filename}` : "",
       });
 
@@ -91,6 +93,5 @@ router.post(
     }
   }
 );
-
 
 module.exports = router;

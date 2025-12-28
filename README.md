@@ -1,123 +1,60 @@
-Design Exercise Hub
+# Design Exercises Hub – Backend API
 
-Web2 – Backend API  
+This is the backend API for the Design Exercises Hub project.
+The API handles authentication, file uploads and data storage for assignments.
 
-Backend API voor **Design Exercise Hub**.  
-De API beheert design-oefeningen, categorieën, feedback en assets (uploads).
-
-
-1. Tech stack
+## Tech Stack
 
 - Node.js
 - Express
 - MongoDB Atlas
 - Mongoose
-- Multer
+- JWT Authentication
+- Multer (file uploads)
 - dotenv
 - CORS
 
+## Features
 
-2. Installatie
+- User registration and login
+- Secure file uploads (image, video, PDF)
+- Assignment storage
+- Upload counter per user (used for easter egg feature)
+- RESTful API structure
 
-- Installeer dependencies:
+## Installation
 
-npm install
-Maak een .env bestand in de root:
+1. Navigate to the backend folder
+2. Install dependencies:
+   npm install
 
-env
-MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/<database>
-PORT=5052
-JWT_SECRET=supersecret
-Start de server:
+## Create a .env file in the root of the backend with:
 
-npm run dev
-De server draait op:
+- env
+- Code kopiëren
+- MONGODB_URI=your_mongodb_connection_string
+- PORT=5052
+- JWT_SECRET=your_secret_key
 
-http://localhost:5052
+## Start the server:
+- npm run dev
+- The server will run on:
+- http://localhost:5052
 
-Projectstructuur
-css
+## API Endpoints (overview)
+- Base URL: http://localhost:5052/api
+- POST /users/register
+- POST /users/login
+- GET /assets
+- POST /assets/upload
+- Uploaded files are stored in /uploads and are served statically.
 
-src/
-  models/
-  routes/
-  app.js
-server.js
-uploads/
-Datamodel (overzicht)
+## Sources
+- Express documentation
+- MongoDB Atlas documentation
+- Multer documentation
+- ChatGPT (OpenAI) – used as a support tool for debugging, clarification and conceptual guidance
 
-* Category
-    name
-    description
-    timestamps
-
-* Exercise
-    title
-    category (ObjectId → Category)
-    programme
-    year
-    degree
-    description
-    timestamps
-    
-* Feedback
-    exercise (ObjectId → Exercise)
-    comment
-    timestamps
-
-* Asset
-    exercise (ObjectId → Exercise)
-    filename
-    originalName
-    url
-    caption
-    timestamps
-
-API Endpoints
-Base URL: http://localhost:5052/api
-
-* Categories
-    GET /categories
-    POST /categories
-    PUT /categories/:id
-    DELETE /categories/:id
-
-* Exercises
-    GET /exercises
-    POST /exercises
-    PUT /exercises/:id
-    DELETE /exercises/:id
-
-* Feedback
-    GET /feedback
-    POST /feedback
-    DELETE /feedback/:id
-
-* Assets (multer upload)
-    GET /assets
-    POST /assets/upload
-    DELETE /assets/:id
-
-* Multer uploads
-Geüploade bestanden worden opgeslagen in:
-
-    /uploads
-    De map wordt statisch geserveerd via:
-    app.use('/uploads', express.static('uploads'));
-    Een bestand is bereikbaar via:
-
-http://localhost:5052/uploads/<filename>
-- Opmerkingen
-- Relaties worden gelegd via ObjectId en ref
-- Assets worden gekoppeld aan exercises
-- Feedback hoort bij één exercise
-- Backend volgt REST-principes
-
-
-
-
-
-
-
-
-
+## Notes
+The backend is designed to work together with the frontend of the Design Exercises Hub.
+Possible future improvements include admin moderation tools and user profile management.

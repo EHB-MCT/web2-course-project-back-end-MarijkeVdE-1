@@ -41,44 +41,56 @@ router.get("/", async (req, res) => {
  * POST /api/assets/upload
  * Upload asset (image/mp4/pdf/...)
  */
-router.post("/upload", requireAuth, upload.single("file"), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ message: "No file uploaded." });
+router.post(
+  "/upload",
+  requireAuth,
+  upload.fields([
+    { name: "file", maxCount: 1 },
+    { name: "preview", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    try {
+      const main = req.files?.file?.[0];
+      const preview = req.files?.preview?.[0];
 
-    const { category, year, title, caption, exercise } = req.body;
+      if (!main) return res.status(400).json({ message: "No file uploaded." });
 
-    const asset = await Asset.create({
-      userId: req.userId,
-      category: category || "",
-      year: year || "",
-      title: title || "",
-      caption: caption || "",
-      exercise: exercise || "",
-      filename: req.file.filename,
-      originalName: req.file.originalname,
-      mimeType: req.file.mimetype,
-      size: req.file.size,
-      url: `/uploads/${req.file.filename}`,
-    });
+      const { category, year, title, caption, exercise } = req.body;
 
-    // Easter egg teller: +1 en nieuwe waarde teruggeven
-    // 👇 uploadCount verhogen
-    const user = await User.findByIdAndUpdate(
-      req.userId,
-      { $inc: { uploadCount: 1 } },
-      { new: true }
-    );
+      const asset = await Asset.create({
+        userId: req.userId,
+        category: category || "",
+        year: year || "",
+        title: title || "",
+        caption: caption || "",
+        exercise: exercise || "",
 
-    // 👇 asset + teller terugsturen
-    res.status(201).json({
-      asset,
-      uploadCount: user.uploadCount,
-    });
+        filename: main.filename,
+        originalName: main.originalname,
+        mimeType: main.mimetype,
+        size: main.size,
+        url: `/uploads/${main.filename}`,
 
-  } catch (err) {
-    console.error("ASSET UPLOAD ERROR:", err);
-    res.status(500).json({ message: "Upload failed." });
+        // ✅ extra previewUrl (indien aanwezig)
+        previewUrl: preview ? `/uploads/${preview.filename}` : "",
+      });
+
+      const user = await User.findByIdAndUpdate(
+        req.userId,
+        { $inc: { uploadCount: 1 } },
+        { new: true }
+      );
+
+      res.status(201).json({
+        asset,
+        uploadCount: user?.uploadCount ?? null,
+      });
+    } catch (err) {
+      console.error("ASSET UPLOAD ERROR:", err);
+      res.status(500).json({ message: "Upload failed." });
+    }
   }
-});
+);
+
 
 module.exports = router;

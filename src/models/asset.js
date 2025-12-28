@@ -31,6 +31,11 @@ const assetSchema = new mongoose.Schema(
       type: String, 
       required: true 
     },
+
+    previewUrl: { 
+      type: String, 
+      default: "" },
+      
   },
   { timestamps: true }
 );
